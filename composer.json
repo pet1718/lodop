@@ -1,0 +1,8 @@
+{
+    "name": "petcircle/lodop",
+    "description": "Lodop,C-Lodop,打印控件,WEB打印、C-Lodop,CLodop,lodop控件,云打印,手机打印,免费,AO打印",
+    "license": "Apache-2.0",
+    "autoload": {
+        "psr-4" : {"petcircle\\lodop\\":""}
+    }
+}
