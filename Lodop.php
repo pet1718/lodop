@@ -4,12 +4,24 @@ namespace petcircle\lodop;
 
 class Lodop
 {
+    /**
+     * @var string js變亮名稱
+     */
     protected $variableName = 'LODOP';
 
+    /**
+     * @var string 任務名稱
+     */
     protected $printTaskName = '';
 
+    /**
+     * @var 打印尺寸
+     */
     protected $printSize;
 
+    /**
+     * @var array 打印內容
+     */
     protected $prints = [];
 
     /**
@@ -37,6 +49,11 @@ class Lodop
         return $this;
     }
 
+    /**
+     * 取得 纸张大小
+     *
+     * @return string
+     */
     public function getPrintSize()
     {
         return $this->printSize;
@@ -78,6 +95,14 @@ class Lodop
         return $this;
     }
 
+    /**
+     * @param $intTop
+     * @param $intLeft
+     * @param $intWidth
+     * @param $intHeight
+     * @param $strHtml
+     * @return $this
+     */
     public function addPrintTable($intTop,$intLeft,$intWidth,$intHeight,$strHtml)
     {
         $this->addPrint($this->getVariableName() . ".ADD_PRINT_TABLE($intTop,$intLeft,$intWidth,$intHeight,$strHtml);");
@@ -102,21 +127,46 @@ class Lodop
         return $this;
     }
 
+    /**
+     * 加入barcode
+     *
+     * @param $Top
+     * @param $Left
+     * @param $Width
+     * @param $Height
+     * @param $BarCodeType
+     * @param $BarCodeValue
+     * @return $this
+     */
     public function addPrintBarcode($Top,$Left,$Width,$Height,$BarCodeType,$BarCodeValue)
     {
         $this->addPrint($this->getVariableName() . ".ADD_PRINT_BARCODE($Top,$Left,$Width,$Height,$BarCodeType,$BarCodeValue);");
         return $this;
     }
 
+    /**
+     * @param $intTop
+     * @param $intLeft
+     * @param $intWidth
+     * @param $intHeight
+     * @param $strURL
+     * @return $this
+     */
     public function addPrintUrl($intTop,$intLeft,$intWidth,$intHeight,$strURL)
     {
         $this->addPrint($this->getVariableName() . ".ADD_PRINT_URL($intTop,$intLeft,$intWidth,$intHeight,$strURL);");
         return $this;
     }
 
-    public function addPrint($printContent)
+    /**
+     * 加入打印代碼
+     *
+     * @param string $print 打印的代碼
+     * @return $this
+     */
+    public function addPrint($print)
     {
-        $this->prints[] = $printContent;
+        $this->prints[] = $print;
         return $this;
     }
 
@@ -132,11 +182,21 @@ class Lodop
         return $this;
     }
 
+    /**
+     * 取得打印代碼
+     *
+     * @return string
+     */
     public function getPrints()
     {
         return implode("\n", $this->prints);
     }
 
+    /**
+     * 初始代碼
+     *
+     * @return string
+     */
     public function getInit()
     {
         $init = [$this->getVariableName() . '=getLodop();'];
@@ -178,6 +238,8 @@ class Lodop
     }
 
     /**
+     * 打印维护
+     *
      * @param bool $withInit
      * @return string
      */
@@ -186,6 +248,12 @@ class Lodop
         return $this->output($withInit, 'PRINT_SETUP');
     }
 
+    /**
+     * 打印设计
+     *
+     * @param bool $withInit
+     * @return string
+     */
     public function printDesign($withInit = true)
     {
         return $this->output($withInit, 'PRINT_DESIGN');
@@ -195,10 +263,10 @@ class Lodop
      * 輸出結果
      *
      * @param bool $withInit
-     * @param string $methodName
+     * @param string $method
      * @return string
      */
-    protected function output($withInit = true, $methodName)
+    protected function output($withInit = true, $method)
     {
         $scripts = '';
         if ($withInit) {
@@ -207,7 +275,7 @@ class Lodop
 
         $scripts .= $this->getPrints();
 
-        $scripts .= $this->getVariableName() . ".$methodName();";
+        $scripts .= $this->getVariableName() . ".$method();";
 
         return $scripts;
     }
