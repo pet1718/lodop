@@ -2,9 +2,9 @@
 
 namespace petcircle\lodop;
 
-class Lodop
+class Clodop
 {
-    protected $variableName = 'LODOP';
+    protected $variableName = 'CLODOP';
 
     protected $printTaskName = '';
 
@@ -33,10 +33,13 @@ class Lodop
      */
     public function setPrintSize($intOrient,$intPageWidth,$intPageHeight,$strPageName = null)
     {
-        $this->printSize = $this->getVariableName() . ".SET_PRINT_PAGESIZE($intOrient,$intPageWidth,$intPageHeight,$strPageName);";
+        $this->printSize =  $this->getVariableName() . ".SET_PRINT_PAGESIZE($intOrient,$intPageWidth,$intPageHeight,'$strPageName');";
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getPrintSize()
     {
         return $this->printSize;
@@ -44,7 +47,7 @@ class Lodop
 
     public function setPrintStyle($strStyleName, $varStyleValue)
     {
-        $this->addPrint($this->getVariableName() . ".SET_PRINT_STYLE($strStyleName, $varStyleValue);");
+        $this->addPrint("SET_PRINT_STYLE('$strStyleName', '$varStyleValue'');");
         return $this;
     }
 
@@ -59,7 +62,9 @@ class Lodop
      */
     public function addPrintHtml($intTop,$intLeft,$intWidth,$intHeight,$strHtml)
     {
-        $this->addPrint($this->getVariableName() . ".ADD_PRINT_HTM($intTop,$intLeft,$intWidth,$intHeight,$strHtml);");
+        $strHtml = $this->jsNewLineString($strHtml);
+
+        $this->addPrint("ADD_PRINT_HTM($intTop,$intLeft,$intWidth,$intHeight,'$strHtml');");
         return $this;
     }
 
@@ -74,13 +79,16 @@ class Lodop
      */
     public function addPrintText($intTop,$intLeft,$intWidth,$intHeight,$strContent)
     {
-        $this->addPrint($this->getVariableName().".ADD_PRINT_TEXT($intTop,$intLeft,$intWidth,$intHeight,$strContent);");
+        $strContent = $this->jsNewLineString($strContent);
+
+        $this->addPrint("ADD_PRINT_TEXT($intTop,$intLeft,$intWidth,$intHeight,'$strContent');");
         return $this;
     }
 
     public function addPrintTable($intTop,$intLeft,$intWidth,$intHeight,$strHtml)
     {
-        $this->addPrint($this->getVariableName() . ".ADD_PRINT_TABLE($intTop,$intLeft,$intWidth,$intHeight,$strHtml);");
+        $strHtml = $this->jsNewLineString($strHtml);
+        $this->addPrint("ADD_PRINT_TABLE($intTop,$intLeft,$intWidth,$intHeight,'$strHtml');");
         return $this;
     }
 
@@ -98,26 +106,35 @@ class Lodop
      */
     public function addPrintShape($intShapeType,$intTop,$intLeft,$intWidth,$intHeight,$intLineStyle,$intLineWidth,$intColor)
     {
-        $this->addPrint($this->getVariableName() . ".ADD_PRINT_SHAPE($intShapeType,$intTop,$intLeft,$intWidth,$intHeight,$intLineStyle,$intLineWidth,$intColor);");
+        $this->addPrint("ADD_PRINT_SHAPE($intShapeType,$intTop,$intLeft,$intWidth,$intHeight,$intLineStyle,$intLineWidth,$intColor);");
         return $this;
     }
 
     public function addPrintBarcode($Top,$Left,$Width,$Height,$BarCodeType,$BarCodeValue)
     {
-        $this->addPrint($this->getVariableName() . ".ADD_PRINT_BARCODE($Top,$Left,$Width,$Height,$BarCodeType,$BarCodeValue);");
+        $this->addPrint("ADD_PRINT_BARCODE($Top,$Left,$Width,$Height,'$BarCodeType','$BarCodeValue');");
         return $this;
     }
 
     public function addPrintUrl($intTop,$intLeft,$intWidth,$intHeight,$strURL)
     {
-        $this->addPrint($this->getVariableName() . ".ADD_PRINT_URL($intTop,$intLeft,$intWidth,$intHeight,$strURL);");
+        $this->addPrint("ADD_PRINT_URL($intTop,$intLeft,$intWidth,$intHeight,'$strURL');");
         return $this;
     }
 
-    public function addPrint($printContent)
+    public function addPrint($printContent, $withVariablePrefix = true)
     {
+        if ($withVariablePrefix) {
+            $printContent = $this->getVariableName() . '.' . $printContent;
+        }
+
         $this->prints[] = $printContent;
         return $this;
+    }
+
+    public function jsNewLineString($string)
+    {
+        return str_replace("\n", "\\\n", $string);
     }
 
     /**
@@ -126,7 +143,7 @@ class Lodop
      * @param $func
      * @return $this
      */
-    public function AddOnReturn($func)
+    public function addOnReturn($func)
     {
         $this->addPrint($this->getVariableName() . ".On_Return= $func;");
         return $this;
@@ -134,18 +151,28 @@ class Lodop
 
     public function getPrints()
     {
-        return implode("\n", $this->prints);
+        return implode("", $this->prints);
     }
 
     public function getInit()
     {
-        $init = [$this->getVariableName() . '=getLodop();'];
+        $init = [];
 
         if ($this->getPrintSize()) {
             $init[] = $this->getPrintSize();
         }
 
-        return implode("\n", $init);
+        return implode("", $init);
+    }
+
+    public function setPrinterIndexa($index)
+    {
+        return $this->addPrint( "SET_PRINTER_INDEXA($index);");
+    }
+
+    public function newPage()
+    {
+        return $this->addPrint('NEWPAGE();');
     }
 
     /**
@@ -161,7 +188,7 @@ class Lodop
      * @param bool $withInit
      * @return string
      */
-    public function print($withInit = true)
+    public function printNormal($withInit = true)
     {
         return $this->output($withInit, 'PRINT');
     }
@@ -209,7 +236,7 @@ class Lodop
 
         $scripts .= $this->getVariableName() . ".$methodName();";
 
-        return $scripts;
+        return "(function(){ $scripts })";
     }
 
     /**
