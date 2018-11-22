@@ -33,7 +33,7 @@ class Clodop
      */
     public function setPrintSize($intOrient,$intPageWidth,$intPageHeight,$strPageName = null)
     {
-        $this->printSize =  $this->getVariableName() . ".SET_PRINT_PAGESIZE($intOrient,$intPageWidth,$intPageHeight,'$strPageName');";
+        $this->printSize =  $this->getVariableName() . ".SET_PRINT_PAGESIZE('$intOrient','$intPageWidth','$intPageHeight','$strPageName');";
         return $this;
     }
 
@@ -47,8 +47,12 @@ class Clodop
 
     public function setPrintStyle($strStyleName, $varStyleValue)
     {
-        $this->addPrint("SET_PRINT_STYLE('$strStyleName', '$varStyleValue'');");
-        return $this;
+        return $this->addPrint("SET_PRINT_STYLE('$strStyleName', '$varStyleValue');");
+    }
+
+    public function setPrintStylea($varItemNameID, $strStyleName, $varStyleValue)
+    {
+        return $this->addPrint("SET_PRINT_STYLEA('$varItemNameID','$strStyleName','$varStyleValue');");
     }
 
     /**
@@ -64,8 +68,7 @@ class Clodop
     {
         $strHtml = $this->jsNewLineString($strHtml);
 
-        $this->addPrint("ADD_PRINT_HTM($intTop,$intLeft,$intWidth,$intHeight,'$strHtml');");
-        return $this;
+        return $this->addPrint("ADD_PRINT_HTM('$intTop','$intLeft','$intWidth','$intHeight','$strHtml');");
     }
 
     /**
@@ -81,15 +84,14 @@ class Clodop
     {
         $strContent = $this->jsNewLineString($strContent);
 
-        $this->addPrint("ADD_PRINT_TEXT($intTop,$intLeft,$intWidth,$intHeight,'$strContent');");
-        return $this;
+        return $this->addPrint("ADD_PRINT_TEXT('$intTop','$intLeft','$intWidth','$intHeight','$strContent');");
     }
 
     public function addPrintTable($intTop,$intLeft,$intWidth,$intHeight,$strHtml)
     {
         $strHtml = $this->jsNewLineString($strHtml);
-        $this->addPrint("ADD_PRINT_TABLE($intTop,$intLeft,$intWidth,$intHeight,'$strHtml');");
-        return $this;
+
+        return $this->addPrint("ADD_PRINT_TABLE('$intTop','$intLeft','$intWidth','$intHeight','$strHtml');");
     }
 
     /**
@@ -106,20 +108,32 @@ class Clodop
      */
     public function addPrintShape($intShapeType,$intTop,$intLeft,$intWidth,$intHeight,$intLineStyle,$intLineWidth,$intColor)
     {
-        $this->addPrint("ADD_PRINT_SHAPE($intShapeType,$intTop,$intLeft,$intWidth,$intHeight,$intLineStyle,$intLineWidth,$intColor);");
-        return $this;
+        return $this->addPrint("ADD_PRINT_SHAPE('$intShapeType','$intTop','$intLeft','$intWidth','$intHeight','$intLineStyle','$intLineWidth','$intColor');");
     }
 
     public function addPrintBarcode($Top,$Left,$Width,$Height,$BarCodeType,$BarCodeValue)
     {
-        $this->addPrint("ADD_PRINT_BARCODE($Top,$Left,$Width,$Height,'$BarCodeType','$BarCodeValue');");
-        return $this;
+        return $this->addPrint("ADD_PRINT_BARCODE('$Top','$Left','$Width','$Height','$BarCodeType','$BarCodeValue');");
     }
 
     public function addPrintUrl($intTop,$intLeft,$intWidth,$intHeight,$strURL)
     {
-        $this->addPrint("ADD_PRINT_URL($intTop,$intLeft,$intWidth,$intHeight,'$strURL');");
-        return $this;
+        return $this->addPrint("ADD_PRINT_URL('$intTop','$intLeft','$intWidth','$intHeight','$strURL');");
+    }
+
+    public function addPrintImage($Top,$Left,$Width,$Height,$strHtml)
+    {
+        return $this->addPrint("ADD_PRINT_IMAGE('$Top','$Left','$Width','$Height','$strHtml');");
+    }
+
+    public function addPrintLine($Top1,$Left1,$Top2,$Left2,$intLineStyle,$intLineWidth)
+    {
+        return $this->addPrint("ADD_PRINT_LINE('$Top1','$Left1','$Top2','$Left2','$intLineStyle','$intLineWidth');");
+    }
+
+    public function addPrintRect($Top,$Left,$Width,$Height,$intLineStyle,$intLineWidth)
+    {
+        return $this->addPrint("ADD_PRINT_RECT('$Top','$Left','$Width','$Height','$intLineStyle','$intLineWidth');");
     }
 
     public function addPrint($printContent, $withVariablePrefix = true)
@@ -170,6 +184,11 @@ class Clodop
         return $this->addPrint( "SET_PRINTER_INDEXA($index);");
     }
 
+    /**
+     * 新分页
+     *
+     * @return Clodop
+     */
     public function newPage()
     {
         return $this->addPrint('NEWPAGE();');
@@ -181,7 +200,7 @@ class Clodop
      */
     public function preview($withInit = true)
     {
-        return $this->output($withInit, 'PRIVIEW');
+        return $this->output($withInit, 'PREVIEW');
     }
 
     /**
